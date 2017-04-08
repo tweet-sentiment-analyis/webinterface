@@ -35,6 +35,6 @@ body{
   flex-direction: column;;
 }
 
-#highcharts_timeseries{
+.highcharts{
   margin: 10vh 0 0 0;
 }

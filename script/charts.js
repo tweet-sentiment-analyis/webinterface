@@ -49,7 +49,7 @@ $(function () {
             type: 'areaspline'
         },
         title: {
-            text: 'Sentimental Analysis'
+            text: 'Sentimental Mean'
         },
         xAxis: {
             categories: ['1', '2', '3', '4', '5']
