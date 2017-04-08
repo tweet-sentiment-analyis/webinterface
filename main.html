@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Twitter Sentiment Analysis</title>
+
+    <link rel="stylesheet" href="style/reset.css">
+    <link rel="stylesheet" href="style/master.css">
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
+    <script src="http://code.highcharts.com/highcharts.js"></script>
+  </head>
+  <body>
+
+    <div id="interaction_box">
+      <div class="search_description">
+        <p>Enter the a word to search box and start sentimental analysis from Twitter.</p>
+        <p>Hit Stop to terminate the search.</p>
+      </div>
+      <div class="search_field">
+        <form class="search_form" action="" method="get">
+          <input type="text" name="search" value="Search E.g. 'kittens'">
+          <div class="buttons">
+            <input type="button" name="Start!" value="Start!">
+            <input type="button" name="Stop!" value="Stop!">
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div id="highcharts_timeseries" style="height: 300px">
+    </div>
+    <div id="highcharts_mean" style="height: 300px">
+    </div>
+
+    <script src="script/charts.js"></script>
+  </body>
+</html>
