@@ -77,10 +77,10 @@ function TimeseriesChart(selector) {
                 if ("aggregations" in data && "time_buckets" in data.aggregations && "buckets" in data.aggregations.time_buckets) {
                     var buckets = data.aggregations.time_buckets.buckets;
 
+                    var dataPointsAdded = false;
                     for (var i=0; i<buckets.length; i++) {
-
-
                         if (buckets[i].doc_count > 0) {
+                            dataPointsAdded = true;
                             var dataPoint = {
                                 id: buckets[i].key,
                                 x: buckets[i].key,
@@ -90,12 +90,16 @@ function TimeseriesChart(selector) {
                             if (-1 === series.data.indexOf(dataPoint)) {
                                 series.addPoint(
                                     dataPoint,
-                                    true,
+                                    false,
                                     false,
                                     false
                                 );
                             }
                         }
+                    }
+
+                    if (dataPointsAdded) {
+                        chart.redraw(false);
                     }
                 }
             });
