@@ -27,7 +27,7 @@ function StatsChart(sentimentAvgSelector, docCountSelector, sentimentMinSelector
 
     function destroy() {
         if (intervalHandler !== null) {
-            intervalHandler.clear();
+            clearInterval(intervalHandler)
         }
     }
 }

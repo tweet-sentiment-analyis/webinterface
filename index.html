@@ -92,6 +92,9 @@
     $(document).ready(function () {
         const REGISTRAR_URL = 'http://localhost:8080';
 
+        var timeSeriesChart = null;
+        var statsChart = null;
+
         $('#search-btn').click(function (event) {
             event.preventDefault();
 
@@ -111,10 +114,10 @@
             }).done(function (data) {
                 console.log("registered term " + searchTerm);
 
-                var timeseriesChart = new TimeseriesChart(highcharts_timeseries);
-                timeseriesChart.create(searchTerm);
+                timeSeriesChart = new TimeseriesChart(highcharts_timeseries);
+                timeSeriesChart.create(searchTerm);
 
-                var statsChart = new StatsChart(
+                statsChart = new StatsChart(
                     "#sentiment-avg",
                     "#doc-count",
                     "#sentiment-min",
@@ -127,6 +130,22 @@
                 console.error("Got an error while registering a search term: " + data);
             });
         });
+
+        $('#stop-btn').click(function (event) {
+            event.preventDefault();
+
+            timeSeriesChart.destroy();
+            statsChart.destroy();
+
+            $.ajax({
+                type: "POST",
+                url: REGISTRAR_URL + "/terms/stop"
+            }).done(function (data) {
+                console.log("unregistered term");
+            }).fail(function (data) {
+                console.error("could not unregister term");
+            });
+        })
     });
 </script>
 

@@ -1,8 +1,10 @@
 function TimeseriesChart(selector) {
     var chart = null;
+    var intervalHandler = null;
 
     return {
-        create: create
+        create: create,
+        destroy: destroy
     };
 
     function create(searchTerm) {
@@ -67,7 +69,7 @@ function TimeseriesChart(selector) {
         var esClient = new ElasticsearchClient();
 
         var series = esHighChartThis.series[0];
-        setInterval(function () {
+        intervalHandler = setInterval(function () {
             var result = esClient.search(searchTerm);
 
             result.then(function (data) {
@@ -101,6 +103,11 @@ function TimeseriesChart(selector) {
                 }
             });
         }, 1000);
+    }
 
+    function destroy() {
+        if (null !== intervalHandler) {
+            clearInterval(intervalHandler);
+        }
     }
 }
