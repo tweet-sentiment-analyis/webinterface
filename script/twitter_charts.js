@@ -1,3 +1,10 @@
+
+var tweets = search("kittens");
+
+
+console.log(tweets);
+
+
 var sentimentalValues = [2, 3, 2, 1.2, 4, 3.5];
 
 
