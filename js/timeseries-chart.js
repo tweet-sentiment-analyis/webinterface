@@ -27,12 +27,7 @@ function TimeseriesChart(selector) {
             yAxis: {
                 title: {
                     text: 'Sentiment Value'
-                },
-                plotLines: [{
-                    value: 0,
-                    width: 1,
-                    color: '#808080'
-                }]
+                }
             },
             tooltip: {
                 formatter: function () {
@@ -49,6 +44,11 @@ function TimeseriesChart(selector) {
             },
             series: [{
                 name: 'Sentiment Series for ' + searchTerm,
+                lineWidth: 0.5,
+                marker: {
+                    enabled: true,
+                    radius: 2
+                },
                 data: (function () {
                     // generate an array of random data
                     return [
@@ -68,10 +68,7 @@ function TimeseriesChart(selector) {
 
         var series = esHighChartThis.series[0];
         setInterval(function () {
-            var now = Math.floor((new Date()).getTime() / 1000) - 60;
-            var nowPlus1Second = Math.floor((new Date()).getTime() / 1000);
-
-            var result = esClient.search(searchTerm, now, nowPlus1Second);
+            var result = esClient.search(searchTerm);
 
             result.then(function (data) {
                 if ("aggregations" in data && "time_buckets" in data.aggregations && "buckets" in data.aggregations.time_buckets) {
