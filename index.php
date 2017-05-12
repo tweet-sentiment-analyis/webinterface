@@ -90,7 +90,7 @@
 
 <script type="application/javascript">
     $(document).ready(function () {
-        const REGISTRAR_URL = 'http://localhost:8080';
+        const REGISTRAR_URL = '<?php echo getenv("REGISTRAR_URL"); ?>';
 
         var timeSeriesChart = null;
         var statsChart = null;
