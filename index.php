@@ -183,9 +183,6 @@
         architecturalChart.config.intervalTimeout = 5000;
         architecturalChart.create();
 
-        // TODO: remove this
-        window.archChart = architecturalChart;
-
     });
 </script>
 

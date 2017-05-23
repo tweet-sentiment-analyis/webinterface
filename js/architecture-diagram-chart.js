@@ -10,9 +10,11 @@ function ArchitectureDiagramChart(diagramChartSelector) {
 
     var outgoingQueueLabels = [];
     var outgoingQueueElement = null;
-    var outgoingQueueArrow = null;
+    var outgoingQueue1Arrow = null;
+    var outgoingQueue2Arrow = null;
 
-    var currentWorkerElements = [];
+    var currentAnalyzerWorkerElements = [];
+    var currentProducerWorkerElements = [];
 
     renderer = new Highcharts.Renderer(chartDiv, chartElement.width(), 300);
 
@@ -20,15 +22,31 @@ function ArchitectureDiagramChart(diagramChartSelector) {
     var queueColor = 'orange';
     var queueLeftPadding = 5;
     var queueTopPadding = 5;
-    var queueWidth = chartElement.width() / 5;
-    var queueHeight = chartElement.height() / 5;
+    var queueWidth = chartElement.width() / 7;
+    var queueHeight = chartElement.height() / 7;
 
     // labels
     var labelHeight = 10;
 
+    // worker nodes
+    var workerNodeColor = 'blue';
+    var workerNodeTopPadding = queueTopPadding;
+    var workerNodeWidth = queueWidth;
+
+    // arrows
+    var arrowHeight = 5;
+    var arrowHeadWidth = 10;
+    var arrowLineWidth = queueWidth - arrowHeadWidth - 4 * queueLeftPadding;
+    var arrowBeginY = queueTopPadding + (queueHeight / 2) - arrowHeight;
+    var arrow1BeginX = queueLeftPadding + queueWidth;
+    var arrow2BeginX = arrow1BeginX + arrowLineWidth + workerNodeWidth + arrowHeadWidth + queueLeftPadding;
+    var arrow3BeginX = arrow2BeginX + arrowLineWidth + workerNodeWidth + arrowHeadWidth + queueLeftPadding * 2;
+
+
     return {
         create: create,
-        updateWorkerNodes: updateWorkerNodes,
+        updateAnalyzerWorkerNodes: updateAnalyzerWorkerNodes,
+        updateProducerWorkerNodes: updateProducerWorkerNodes,
         updateIncomingQueueLabel: updateIncomingQueueLabel,
         updateOutgoingQueueLabel: updateOutgoingQueueLabel,
         destroy: destroy
@@ -44,25 +62,42 @@ function ArchitectureDiagramChart(diagramChartSelector) {
             .add();
 
         // queue 1: arrow right
-
-        var arrowHeight = 5;
-        var arrowHeadWidth = 10;
-        var arrowLineWidth = queueWidth - arrowHeadWidth - 4 * queueLeftPadding;
-        var arrowBeginX = queueLeftPadding + queueWidth;
-        var arrowBeginY = queueTopPadding + (queueHeight / 2) - arrowHeight;
-
         incomingQueueArrow = renderer
             .path([
                 // Line: -----
                 // Move To (M), x, y
-                'M', arrowBeginX, arrowBeginY,
+                'M', arrow1BeginX, arrowBeginY,
                 // Line To (L), x, y
-                'L', arrowBeginX + arrowLineWidth - arrowHeadWidth, arrowBeginY,
+                'L', arrow1BeginX + arrowLineWidth - arrowHeadWidth, arrowBeginY,
 
                 // Right arrow: >
-                'M', arrowBeginX + arrowLineWidth - arrowHeadWidth, arrowBeginY - arrowHeight,
-                arrowBeginX + arrowLineWidth, arrowBeginY,
-                arrowBeginX + arrowLineWidth - arrowHeadWidth, arrowBeginY + arrowHeight,
+                'M', arrow1BeginX + arrowLineWidth - arrowHeadWidth, arrowBeginY - arrowHeight,
+                arrow1BeginX + arrowLineWidth, arrowBeginY,
+                arrow1BeginX + arrowLineWidth - arrowHeadWidth, arrowBeginY + arrowHeight,
+                // go back to the beginning
+                'Z'
+            ])
+            .attr({
+                fill: 'red',
+                'stroke-width': 2,
+                stroke: 'red',
+
+                transform: 'translate(10, 10)'
+            })
+            .add();
+
+        outgoingQueue1Arrow = renderer
+            .path([
+                // Line: -----
+                // Move To (M), x, y
+                'M', arrow2BeginX, arrowBeginY,
+                // Line To (L), x, y
+                'L', arrow2BeginX + arrowLineWidth - arrowHeadWidth, arrowBeginY,
+
+                // Right arrow: >
+                'M', arrow2BeginX + arrowLineWidth - arrowHeadWidth, arrowBeginY - arrowHeight,
+                arrow2BeginX + arrowLineWidth, arrowBeginY,
+                arrow2BeginX + arrowLineWidth - arrowHeadWidth, arrowBeginY + arrowHeight,
                 // go back to the beginning
                 'Z'
             ])
@@ -77,26 +112,24 @@ function ArchitectureDiagramChart(diagramChartSelector) {
 
         // queue 2
         outgoingQueueElement = renderer
-            .rect(chartElement.width() - queueWidth - queueLeftPadding, queueTopPadding, queueWidth, queueHeight, 0)
+            .rect(arrow2BeginX + arrowLineWidth + arrowHeadWidth + queueLeftPadding * 2, queueTopPadding, queueWidth, queueHeight, 0)
             .attr({
                 fill: queueColor
             })
             .add();
 
-        arrowBeginX = chartElement.width() - queueWidth - queueLeftPadding * 3 - arrowHeadWidth - arrowLineWidth;
-
-        outgoingQueueArrow = renderer
+        outgoingQueue2Arrow = renderer
             .path([
                 // Line: -----
                 // Move To (M), x, y
-                'M', arrowBeginX, arrowBeginY,
+                'M', arrow3BeginX, arrowBeginY,
                 // Line To (L), x, y
-                'L', arrowBeginX + arrowLineWidth - arrowHeadWidth, arrowBeginY,
+                'L', arrow3BeginX + arrowLineWidth - arrowHeadWidth, arrowBeginY,
 
                 // Right arrow: >
-                'M', arrowBeginX + arrowLineWidth - arrowHeadWidth, arrowBeginY - arrowHeight,
-                arrowBeginX + arrowLineWidth, arrowBeginY,
-                arrowBeginX + arrowLineWidth - arrowHeadWidth, arrowBeginY + arrowHeight,
+                'M', arrow3BeginX + arrowLineWidth - arrowHeadWidth, arrowBeginY - arrowHeight,
+                arrow3BeginX + arrowLineWidth, arrowBeginY,
+                arrow3BeginX + arrowLineWidth - arrowHeadWidth, arrowBeginY + arrowHeight,
                 // go back to the beginning
                 'Z'
             ])
@@ -145,35 +178,33 @@ function ArchitectureDiagramChart(diagramChartSelector) {
         clearOutgoingQueueLabelCache();
 
         var label1 = renderer
-            .label("avlbl. msg: ~" + noMessages, chartElement.width() - queueWidth - queueLeftPadding, (queueTopPadding * 5) + queueHeight, 'rect', null, null, false, true, '')
+            .label("avlbl. msg: ~" + noMessages, arrow2BeginX + arrowLineWidth + arrowHeadWidth + queueLeftPadding * 2, (queueTopPadding * 5) + queueHeight, 'rect', null, null, false, true, '')
             .add();
 
         outgoingQueueLabels.push(label1);
 
         var label2 = renderer
-            .label("delayed msg: ~" + noMessagesDelayed, chartElement.width() - queueWidth - queueLeftPadding, (queueTopPadding * 6) + labelHeight + queueHeight, 'rect', null, null, false, true, '')
+            .label("delayed msg: ~" + noMessagesDelayed, arrow2BeginX + arrowLineWidth + arrowHeadWidth + queueLeftPadding * 2, (queueTopPadding * 6) + labelHeight + queueHeight, 'rect', null, null, false, true, '')
             .add();
 
         outgoingQueueLabels.push(label2);
 
         var label3 = renderer
-            .label("unvisible msg: ~" + noMessagesNotVisible, chartElement.width() - queueWidth - queueLeftPadding, (queueTopPadding * 7) + labelHeight * 2 + queueHeight, 'rect', null, null, false, true, '')
+            .label("unvisible msg: ~" + noMessagesNotVisible, arrow2BeginX + arrowLineWidth + arrowHeadWidth + queueLeftPadding * 2, (queueTopPadding * 7) + labelHeight * 2 + queueHeight, 'rect', null, null, false, true, '')
             .add();
 
         outgoingQueueLabels.push(label3);
     }
 
-    function updateWorkerNodes(noWorkerNodes) {
-        clearWorkerNodeCache();
+    function updateAnalyzerWorkerNodes(noWorkerNodes) {
+        clearAnalyzerWorkerNodeCache();
 
         // worker nodes
-        var workerNodeColor = 'blue';
-        var workerNodeTopPadding = queueTopPadding;
-        var workerNodeWidth = queueWidth;
+
         var workerNodeHeight = (chartElement.height() - noWorkerNodes * workerNodeTopPadding) / noWorkerNodes;
         // set max height equal to queue
         workerNodeHeight = Math.min(workerNodeHeight, queueHeight);
-        var workerLeftPosition = (chartElement.width() / 2) - (workerNodeWidth / 2);
+        var workerLeftPosition = queueLeftPadding + queueWidth + queueLeftPadding + arrowLineWidth + arrowHeadWidth + queueLeftPadding;
 
         for (var i = 0; i < noWorkerNodes; i++) {
             var workerNodeElement = renderer
@@ -183,12 +214,34 @@ function ArchitectureDiagramChart(diagramChartSelector) {
                 })
                 .add();
 
-            currentWorkerElements.push(workerNodeElement);
+            currentAnalyzerWorkerElements.push(workerNodeElement);
+        }
+    }
+
+    function updateProducerWorkerNodes(noWorkerNodes) {
+        clearProducerWorkerNodeCache();
+
+        // worker nodes
+        var workerNodeHeight = (chartElement.height() - noWorkerNodes * workerNodeTopPadding) / noWorkerNodes;
+        // set max height equal to queue
+        workerNodeHeight = Math.min(workerNodeHeight, queueHeight);
+        var workerLeftPosition = queueLeftPadding + queueWidth + queueLeftPadding + arrowLineWidth + arrowHeadWidth + workerNodeWidth + queueLeftPadding + arrowLineWidth + arrowHeadWidth + queueLeftPadding + queueWidth + queueLeftPadding + arrowLineWidth + arrowHeadWidth + queueLeftPadding;
+
+        for (var i = 0; i < noWorkerNodes; i++) {
+            var workerNodeElement = renderer
+                .rect(workerLeftPosition, i * workerNodeHeight + (i + 1) * workerNodeTopPadding, workerNodeWidth, workerNodeHeight, 0)
+                .attr({
+                    fill: workerNodeColor
+                })
+                .add();
+
+            currentProducerWorkerElements.push(workerNodeElement);
         }
     }
 
     function destroy() {
-        clearWorkerNodeCache();
+        clearAnalyzerWorkerNodeCache();
+        clearProducerWorkerNodeCache
         clearIncomingQueueLabelCache();
         clearOutgoingQueueLabelCache();
 
@@ -196,13 +249,22 @@ function ArchitectureDiagramChart(diagramChartSelector) {
         outgoingQueueElement.destroy();
     }
 
-    function clearWorkerNodeCache() {
+    function clearAnalyzerWorkerNodeCache() {
         // remove all old drawn elements
-        for (var key in currentWorkerElements) {
-            currentWorkerElements[key].destroy();
+        for (var key in currentAnalyzerWorkerElements) {
+            currentAnalyzerWorkerElements[key].destroy();
         }
 
-        currentWorkerElements = [];
+        currentAnalyzerWorkerElements = [];
+    }
+
+    function clearProducerWorkerNodeCache() {
+        // remove all old drawn elements
+        for (var key in currentProducerWorkerElements) {
+            currentProducerWorkerElements[key].destroy();
+        }
+
+        currentProducerWorkerElements = [];
     }
 
     function clearIncomingQueueLabelCache() {

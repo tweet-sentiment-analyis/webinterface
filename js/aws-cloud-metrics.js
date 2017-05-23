@@ -10,7 +10,8 @@ function AwsCloudMetrics() {
 
     return {
         create: create,
-        getAutoScalingGroupMetrics: getAutoScalingGroupMetrics,
+        getAnalyzerAutoScalingGroupMetrics: getAnalyzerAutoScalingGroupMetrics,
+        getProducerAutoScalingGroupMetrics: getProducerAutoScalingGroupMetrics,
         getGroupTotalInstances: getGroupTotalInstances,
         getGroupPendingInstances: getGroupPendingInstances,
         getIncomingMessageCount: getIncomingMessageCount,
@@ -35,7 +36,7 @@ function AwsCloudMetrics() {
     }
 
     function getCpuLoadMetrics(callbackFn) {
-        getAutoScalingGroupMetrics(function (data) {
+        getAnalyzerAutoScalingGroupMetrics(function (data) {
             if (data.AutoScalingGroups.length < 1) {
                 console.error("No autoscaling group available for getting load metrics");
                 return;
@@ -85,10 +86,26 @@ function AwsCloudMetrics() {
         });
     }
 
-    function getAutoScalingGroupMetrics(callbackFn) {
+    function getAnalyzerAutoScalingGroupMetrics(callbackFn) {
         var params = {
             AutoScalingGroupNames: [
                 "ASE_ASG_Analyzer"
+            ]
+        };
+
+        autoScaling.describeAutoScalingGroups(params, function (err, data) {
+            if (err) {
+                console.log(err, err.stack);
+            } else {
+                callbackFn(data);
+            }
+        });
+    }
+
+    function getProducerAutoScalingGroupMetrics(callbackFn) {
+        var params = {
+            AutoScalingGroupNames: [
+                "ASE_ASG_ESProducer"
             ]
         };
 

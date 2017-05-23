@@ -6,7 +6,8 @@ function ArchitecturalChart(architectureDiagramSelector, metricDiagramSelector) 
     };
 
     var archOverview = null;
-    var metricsIntervalHandler = null;
+    var analyzerMetricsIntervalHandler = null;
+    var producerMetricsIntervalHandler = null;
     var incomingMsgIntervalHandler = null;
     var outgoingMsgIntervalHandler = null;
     var loadMetricIntervalHandler = null;
@@ -29,13 +30,15 @@ function ArchitecturalChart(architectureDiagramSelector, metricDiagramSelector) 
         archOverview = new ArchitectureDiagramChart(architectureDiagramSelector);
         archOverview.create();
 
-        // TODO: remove this
-        window.archOverview = archOverview;
+        analyzerMetricsIntervalHandler = setInterval(function pollAnalyzerWorkerNodes() {
+            aws.getAnalyzerAutoScalingGroupMetrics(function (data) {
+                archOverview.updateAnalyzerWorkerNodes(data.AutoScalingGroups[0].Instances.length)
+            })
+        }, config.intervalTimeout);
 
-        metricsIntervalHandler = setInterval(function pollWorkerNodes() {
-            aws.getAutoScalingGroupMetrics(function (data) {
-                console.log(data);
-                archOverview.updateWorkerNodes(data.AutoScalingGroups[0].Instances.length)
+        producerMetricsIntervalHandler = setInterval(function pollProducerWorkerNodes() {
+            aws.getProducerAutoScalingGroupMetrics(function (data) {
+                archOverview.updateProducerWorkerNodes(data.AutoScalingGroups[0].Instances.length)
             })
         }, config.intervalTimeout);
 
@@ -102,8 +105,8 @@ function ArchitecturalChart(architectureDiagramSelector, metricDiagramSelector) 
     function destroy() {
         archOverview.destroy();
 
-        if (metricsIntervalHandler !== null) {
-            clearInterval(metricsIntervalHandler);
+        if (analyzerMetricsIntervalHandler !== null) {
+            clearInterval(analyzerMetricsIntervalHandler);
         }
 
         if (incomingMsgIntervalHandler !== null) {
