@@ -63,10 +63,10 @@ function ArchitecturalChart(architectureDiagramSelector, metricDiagramSelector) 
         }, config.intervalTimeout);
 
         loadMetricIntervalHandler = setInterval(function pollLoadMetric() {
-            aws.getCpuLoadMetrics(function (requests) {
+            aws.getAnalyzerCpuLoadMetrics(function (requests) {
                 // clear previously added metrics
                 var avlblInstances = {};
-                $(metricDiagramSelector + " .list-group").children().each(function () {
+                $(metricDiagramSelector).children().each(function () {
                     var id = $(this).attr('id');
                     avlblInstances[id] = id;
                 });
@@ -83,9 +83,51 @@ function ArchitecturalChart(architectureDiagramSelector, metricDiagramSelector) 
                         if (response.data.Datapoints.length > 0) {
 
                             var instanceId =  response.request.params.Dimensions[0].Value;
+                            var avg = Number((response.data.Datapoints[0].Average).toFixed(2)) + " (avg)";
+                            var min = Number((response.data.Datapoints[0].Minimum).toFixed(2)) + " (min)";
+                            var max = Number((response.data.Datapoints[0].Maximum).toFixed(2)) + " (max)";
                             $('#' + instanceId).remove();
-                            $(metricDiagramSelector + " .list-group")
-                                .append('<li id="' + instanceId + '" class="list-group-item"><h4>' + instanceId + '</h4><ul><li><strong>Average:</strong> ' + response.data.Datapoints[0].Average + '</li><li><strong>Maximum:</strong> '+ response.data.Datapoints[0].Maximum +'</li><li><strong>Minimum:</strong> '+ response.data.Datapoints[0].Minimum +'</li></ul></li>');
+                            $(metricDiagramSelector)
+                                .append('<tr id="' + instanceId + '"><td>' + instanceId + '</td><td>Analyzer</td><td>' + avg + '<br>' + max + '<br>' + min +'</td>');
+                        }
+                    });
+
+                    // eventually send the request
+                    requests[instanceId].cpuMetric.send();
+                }
+
+                // all nodes which are still contained, are not listed in the responses anymore
+                for (var key in avlblInstances) {
+                    $('#' + key).remove();
+                }
+            });
+
+            aws.getProducerCpuLoadMetrics(function (requests) {
+                // clear previously added metrics
+                var avlblInstances = {};
+                $(metricDiagramSelector).children().each(function () {
+                    var id = $(this).attr('id');
+                    avlblInstances[id] = id;
+                });
+
+                // remove nodes which do not exist anymore and update the ones which do exist
+                for (var instanceId in requests) {
+                    if (!requests.hasOwnProperty(instanceId)) {
+                        continue;
+                    }
+
+                    delete avlblInstances[instanceId];
+
+                    requests[instanceId].cpuMetric.on('success', function (response) {
+                        if (response.data.Datapoints.length > 0) {
+
+                            var instanceId =  response.request.params.Dimensions[0].Value;
+                            var avg = Number((response.data.Datapoints[0].Average).toFixed(2)) + " (avg)";
+                            var min = Number((response.data.Datapoints[0].Minimum).toFixed(2)) + " (min)";
+                            var max = Number((response.data.Datapoints[0].Maximum).toFixed(2)) + " (max)";
+                            $('#' + instanceId).remove();
+                            $(metricDiagramSelector)
+                                .append('<tr id="' + instanceId + '"><td>' + instanceId + '</td><td>ES Producer</td><td>' + avg + '<br>' + max + '<br>' + min +'</td>');
                         }
                     });
 

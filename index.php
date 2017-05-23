@@ -50,10 +50,17 @@
                 <div class="panel-heading">
                     <h3 class="panel-title">Worker Nodes Performance</h3>
                 </div>
-                <div id="workernodes-performance" class="panel-body">
-                    <ul class="list-group">
-
-                    </ul>
+                <div class="panel-body">
+                    <table class="table table-striped table-condensed">
+                        <thead>
+                        <tr>
+                            <th>Id</th>
+                            <th>Type</th>
+                            <th>CPU Usage</th>
+                        </tr>
+                        </thead>
+                        <tbody id="workernodes-performance"></tbody>
+                    </table>
                 </div>
             </div>
         </div>

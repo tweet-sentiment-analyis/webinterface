@@ -16,7 +16,8 @@ function AwsCloudMetrics() {
         getGroupPendingInstances: getGroupPendingInstances,
         getIncomingMessageCount: getIncomingMessageCount,
         getOutComingMessageCount: getOutComingMessageCount,
-        getCpuLoadMetrics: getCpuLoadMetrics
+        getAnalyzerCpuLoadMetrics: getAnalyzerCpuLoadMetrics,
+        getProducerCpuLoadMetrics: getProducerCpuLoadMetrics
     };
 
     function create(accessKeyId, secretAccessKey) {
@@ -35,10 +36,61 @@ function AwsCloudMetrics() {
         sqs = new AWS.SQS();
     }
 
-    function getCpuLoadMetrics(callbackFn) {
+    function getAnalyzerCpuLoadMetrics(callbackFn) {
         getAnalyzerAutoScalingGroupMetrics(function (data) {
             if (data.AutoScalingGroups.length < 1) {
-                console.error("No autoscaling group available for getting load metrics");
+                console.error("No analyzer autoscaling group available for getting load metrics");
+                return;
+            }
+
+            var period = 300; // seconds
+            var startTime = moment().utc();
+            startTime.subtract(period, 'seconds');
+
+            var endTime = moment().utc();
+
+            var responses = {};
+            for (var key in data.AutoScalingGroups[0].Instances) {
+                var instanceId = data.AutoScalingGroups[0].Instances[key].InstanceId;
+
+                var params = {
+                    StartTime: startTime.format(),
+                    EndTime: endTime.format(),
+                    Period: period, // multiple of 60 if smaller than 15 days
+                    Namespace: "AWS/EC2",
+                    MetricName: "CPUUtilization",
+                    Dimensions: [{
+                        Name: "InstanceId",
+                        Value: instanceId
+                    }],
+                    Statistics: [
+                        "Average",
+                        "Minimum",
+                        "Maximum"
+                        /*  SampleCount| Average | Sum | Minimum | Maximum, */
+                    ],
+                    Unit: "Percent"
+                };
+
+                if (!(instanceId in responses)) {
+                    responses[instanceId] = {};
+                }
+
+                // do not send the request yet but wait until callbacks are registered
+                jQuery.extend(responses[instanceId], {
+                    cpuMetric: cloudWatch.getMetricStatistics(params)
+                });
+            }
+
+            callbackFn(responses);
+
+        });
+    }
+
+    function getProducerCpuLoadMetrics(callbackFn) {
+        getProducerAutoScalingGroupMetrics(function (data) {
+            if (data.AutoScalingGroups.length < 1) {
+                console.error("No analyzer autoscaling group available for getting load metrics");
                 return;
             }
 
