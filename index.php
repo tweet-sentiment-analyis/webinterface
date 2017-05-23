@@ -7,7 +7,6 @@
     <title>Twitter Sentiment Analysis</title>
 
     <script src="bower_components/jquery/dist/jquery.min.js"></script>
-    <script src="http://code.highcharts.com/highcharts.js"></script>
 
     <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="css/stylesheet.css">
@@ -34,6 +33,19 @@
         <div class="col-md-4">
 
         </div>
+    </div>
+    <div class="row">
+        <div class="col-md-8">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Current Architectural Overview</h3>
+                </div>
+                <div id="architectural-overview" class="panel-body">
+
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4"></div>
     </div>
     <div class="row">
         <div class="col-md-12">
@@ -82,11 +94,18 @@
     </div>
 </div>
 
+<!--    <script src="http://code.highcharts.com/highcharts.js"></script>-->
+<script src="bower_components/highcharts/highcharts.js"></script>
+<script src="bower_components/aws-sdk/dist/aws-sdk.js"></script>
 <script src="bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
 <script src="bower_components/elasticsearch/elasticsearch.js"></script>
+<script src="bower_components/moment/min/moment-with-locales.js"></script>
 <script src="js/timeseries-chart.js"></script>
 <script src="js/stats-chart.js"></script>
 <script src="js/elasticsearch-client.js"></script>
+<script src="js/aws-cloud-metrics.js"></script>
+<script src="js/architectural-overview.js"></script>
+<script src="js/architectural-chart.js"></script>
 
 <script type="application/javascript">
     $(document).ready(function () {
@@ -145,7 +164,16 @@
             }).fail(function (data) {
                 console.error("could not unregister term");
             });
-        })
+        });
+
+        var architecturalChart = new ArchitecturalChart("#architectural-overview");
+        architecturalChart.config.accessKeyId = "AKIAJK7MH5K6NML2YCJQ";
+        architecturalChart.config.accessKeySecret = "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";
+        architecturalChart.config.intervalTimeout = 360000;
+        architecturalChart.create();
+
+        window.archChart = architecturalChart;
+
     });
 </script>
 
