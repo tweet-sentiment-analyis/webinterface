@@ -1,7 +1,7 @@
-function ArchitecturalOverview(chartSelector) {
+function ArchitectureDiagramChart(diagramChartSelector) {
 
-    var chartElement = $(chartSelector);
-    var chartDiv = $(chartSelector)[0];
+    var chartElement = $(diagramChartSelector);
+    var chartDiv = $(diagramChartSelector)[0];
     var renderer = null;
 
     var incomingQueueLabels = [];

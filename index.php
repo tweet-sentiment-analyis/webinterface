@@ -45,7 +45,18 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-4"></div>
+        <div class="col-md-4">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Worker Nodes Performance</h3>
+                </div>
+                <div id="workernodes-performance" class="panel-body">
+                    <ul class="list-group">
+
+                    </ul>
+                </div>
+            </div>
+        </div>
     </div>
     <div class="row">
         <div class="col-md-12">
@@ -104,7 +115,7 @@
 <script src="js/stats-chart.js"></script>
 <script src="js/elasticsearch-client.js"></script>
 <script src="js/aws-cloud-metrics.js"></script>
-<script src="js/architectural-overview.js"></script>
+<script src="js/architecture-diagram-chart.js"></script>
 <script src="js/architectural-chart.js"></script>
 
 <script type="application/javascript">
@@ -166,12 +177,13 @@
             });
         });
 
-        var architecturalChart = new ArchitecturalChart("#architectural-overview");
+        var architecturalChart = new ArchitecturalChart("#architectural-overview", "#workernodes-performance");
         architecturalChart.config.accessKeyId = "AKIAJK7MH5K6NML2YCJQ";
         architecturalChart.config.accessKeySecret = "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";
-        architecturalChart.config.intervalTimeout = 360000;
+        architecturalChart.config.intervalTimeout = 5000;
         architecturalChart.create();
 
+        // TODO: remove this
         window.archChart = architecturalChart;
 
     });

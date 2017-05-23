@@ -1,4 +1,4 @@
-function ArchitecturalChart(chartSelector) {
+function ArchitecturalChart(architectureDiagramSelector, metricDiagramSelector) {
     var config = {
         accessKeyId: null,
         accessKeySecret: null,
@@ -9,6 +9,7 @@ function ArchitecturalChart(chartSelector) {
     var metricsIntervalHandler = null;
     var incomingMsgIntervalHandler = null;
     var outgoingMsgIntervalHandler = null;
+    var loadMetricIntervalHandler = null;
 
     return {
         config: config,
@@ -23,20 +24,23 @@ function ArchitecturalChart(chartSelector) {
         // aws.create("AKIAJK7MH5K6NML2YCJQ", "UPfoZdr63I4jUfOcilu5HTytpT+zA2LhhDsyF052");
         aws.create(config.accessKeyId, config.accessKeySecret);
 
-        archOverview = new ArchitecturalOverview(chartSelector);
+        window.awsMetrics = aws;
+
+        archOverview = new ArchitectureDiagramChart(architectureDiagramSelector);
         archOverview.create();
 
+        // TODO: remove this
         window.archOverview = archOverview;
 
         metricsIntervalHandler = setInterval(function pollWorkerNodes() {
             aws.getAutoScalingGroupMetrics(function (data) {
+                console.log(data);
                 archOverview.updateWorkerNodes(data.AutoScalingGroups[0].Instances.length)
             })
         }, config.intervalTimeout);
 
         incomingMsgIntervalHandler = setInterval(function pollIncomingMsgs() {
             aws.getIncomingMessageCount(function (data) {
-                console.log(data);
                 archOverview.updateIncomingQueueLabel(
                     data.Attributes.ApproximateNumberOfMessages,
                     data.Attributes.ApproximateNumberOfMessagesDelayed,
@@ -47,7 +51,6 @@ function ArchitecturalChart(chartSelector) {
 
         outgoingMsgIntervalHandler = setInterval(function pollOutgoingMsgs() {
             aws.getOutComingMessageCount(function (data) {
-                console.log(data);
                 archOverview.updateOutgoingQueueLabel(
                     data.Attributes.ApproximateNumberOfMessages,
                     data.Attributes.ApproximateNumberOfMessagesDelayed,
@@ -55,6 +58,30 @@ function ArchitecturalChart(chartSelector) {
                 );
             })
         }, config.intervalTimeout);
+
+        loadMetricIntervalHandler = setInterval(function pollLoadMetric() {
+            aws.getCpuLoadMetrics(function (requests) {
+                // clear previously added metrics
+                $(metricDiagramSelector + " .list-group").empty();
+                // re-add them now...
+                for (var instanceId in requests) {
+                    if (!requests.hasOwnProperty(instanceId)) {
+                        continue;
+                    }
+
+                    requests[instanceId].cpuMetric.on('success', function (response) {
+                        if (response.data.Datapoints.length > 0) {
+                            $(metricDiagramSelector + " .list-group")
+                                .append('<li class="list-group-item"><h4>' + response.request.params.Dimensions[0].Value + '</h4><ul><li><strong>Average:</strong> ' + response.data.Datapoints[0].Average + '</li><li><strong>Maximum:</strong> '+ response.data.Datapoints[0].Maximum +'</li><li><strong>Minimum:</strong> '+ response.data.Datapoints[0].Minimum +'</li></ul></li>');
+                        }
+                    });
+
+                    // eventually send the request
+                    requests[instanceId].cpuMetric.send();
+                }
+            });
+        }, config.intervalTimeout);
+
     }
 
     function destroy() {
@@ -70,6 +97,10 @@ function ArchitecturalChart(chartSelector) {
 
         if (outgoingMsgIntervalHandler !== null) {
             clearInterval(outgoingMsgIntervalHandler);
+        }
+
+        if (loadMetricIntervalHandler !== null) {
+            clearInterval(loadMetricIntervalHandler);
         }
     }
 }
