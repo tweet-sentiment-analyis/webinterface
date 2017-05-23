@@ -62,22 +62,37 @@ function ArchitecturalChart(architectureDiagramSelector, metricDiagramSelector) 
         loadMetricIntervalHandler = setInterval(function pollLoadMetric() {
             aws.getCpuLoadMetrics(function (requests) {
                 // clear previously added metrics
-                $(metricDiagramSelector + " .list-group").empty();
-                // re-add them now...
+                var avlblInstances = {};
+                $(metricDiagramSelector + " .list-group").children().each(function () {
+                    var id = $(this).attr('id');
+                    avlblInstances[id] = id;
+                });
+
+                // remove nodes which do not exist anymore and update the ones which do exist
                 for (var instanceId in requests) {
                     if (!requests.hasOwnProperty(instanceId)) {
                         continue;
                     }
 
+                    delete avlblInstances[instanceId];
+
                     requests[instanceId].cpuMetric.on('success', function (response) {
                         if (response.data.Datapoints.length > 0) {
+
+                            var instanceId =  response.request.params.Dimensions[0].Value;
+                            $('#' + instanceId).remove();
                             $(metricDiagramSelector + " .list-group")
-                                .append('<li class="list-group-item"><h4>' + response.request.params.Dimensions[0].Value + '</h4><ul><li><strong>Average:</strong> ' + response.data.Datapoints[0].Average + '</li><li><strong>Maximum:</strong> '+ response.data.Datapoints[0].Maximum +'</li><li><strong>Minimum:</strong> '+ response.data.Datapoints[0].Minimum +'</li></ul></li>');
+                                .append('<li id="' + instanceId + '" class="list-group-item"><h4>' + instanceId + '</h4><ul><li><strong>Average:</strong> ' + response.data.Datapoints[0].Average + '</li><li><strong>Maximum:</strong> '+ response.data.Datapoints[0].Maximum +'</li><li><strong>Minimum:</strong> '+ response.data.Datapoints[0].Minimum +'</li></ul></li>');
                         }
                     });
 
                     // eventually send the request
                     requests[instanceId].cpuMetric.send();
+                }
+
+                // all nodes which are still contained, are not listed in the responses anymore
+                for (var key in avlblInstances) {
+                    $('#' + key).remove();
                 }
             });
         }, config.intervalTimeout);
