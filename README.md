@@ -14,9 +14,9 @@ If you do not want to build the container by your own, you may use the following
 ## Run the container
 After you have built the container, you may run it using the following command: 
 ```
-docker run -p 9000:8080 -e REGISTRAR_URL='http://someUrl.toRegistrar.com' -e AWS_ACCESS_KEY_ID="..." -e AWS_ACCESS_KEY_SECRET="..." tweetsentimentanalysis/webinterface:latest
+docker run -p 9000:8080 -e REGISTRAR_URL='http://someUrl.toRegistrar.com' -e ELASTICSEARCH_URL='https://some.Url.com' -e AWS_ACCESS_KEY_ID="..." -e AWS_ACCESS_KEY_SECRET="..." tweetsentimentanalysis/webinterface:latest
 ```
-Use the appropriate URL as well as AWS credentials with at least the permissions of `AmazonSQSReadOnlyAccess, CloudWatchReadOnlyAccesse`.
+Use the appropriate URLs as well as AWS credentials with at least the permissions of `AmazonSQSReadOnlyAccess, CloudWatchReadOnlyAccesse`.
 Note, that you also may specify the following environment variables during startup:
 * `AWS_EC2_REGION`: The region in which the instances of the autoscaling groups are located, e.g. `us-west-2`
 * `AWS_ANALYZER_AUTO_SCALING_GROUP_NAME`: The AWS autoscaling group name of the instances on which tweets get analyzed

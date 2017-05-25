@@ -1,6 +1,6 @@
 function ElasticsearchClient() {
     var client = new elasticsearch.Client({
-        hosts: 'https://search-analysed-tweets-zo3iniwl273mg6vv3zn6zllf6q.us-west-2.es.amazonaws.com'
+        hosts: window.ELASTICSEARCH_URL
     });
 
     return {

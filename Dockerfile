@@ -4,6 +4,8 @@ ADD . ./
 
 # URL to the registrar (aka. tweet fetcher) endpoint
 ENV REGISTRAR_URL="localhost"
+# URL where to fetch latest sentiment analysis values
+ENV ELASTICSEARCH_URL="localhost"
 # AWS Access Key ID to a user with the permissions of at least AmazonSQSReadOnlyAccess, CloudWatchReadOnlyAccess
 ENV AWS_ACCESS_KEY_ID="changeThisKeyId"
 # AWS Access Key Secret to a user with the permissions of at least AmazonSQSReadOnlyAccess, CloudWatchReadOnlyAccess

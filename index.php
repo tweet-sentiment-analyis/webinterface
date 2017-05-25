@@ -21,6 +21,7 @@
     <script type="application/javascript">
         // configure these values globally...
         window.REGISTRAR_URL = '<?php echo getenv("REGISTRAR_URL"); ?>';
+        window.ELASTICSEARCH_URL = '<?php echo getenv("ELASTICSEARCH_URL"); ?>';
         window.AWS_ACCESS_KEY_ID = '<?php echo getenv("AWS_ACCESS_KEY_ID"); ?>';
         window.AWS_ACCESS_KEY_SECRET = '<?php echo getenv("AWS_ACCESS_KEY_SECRET"); ?>';
         window.AWS_EC2_REGION = '<?php echo getenv("AWS_EC2_REGION"); ?>';
@@ -30,7 +31,13 @@
         window.AWS_ANALYZED_TWEETS_SQS_QUEUE_NAME = '<?php echo getenv("AWS_ANALYZED_TWEETS_SQS_QUEUE_NAME"); ?>';
         window.REQUEST_INTERVAL = 2500;
 
+        // prepend protocol if mistakenly omitted...
+        if (-1 === window.REGISTRAR_URL.indexOf("http://") && -1 === window.REGISTRAR_URL.indexOf("https://")) {
+            window.REGISTRAR_URL = "http://" + window.REGISTRAR_URL;
+        }
+
         console.log('Using registrar endpoint: "' + window.REGISTRAR_URL + '"');
+        console.log('Using elasticsearch endpoint: "' + window.ELASTICSEARCH_URL + '"');
         console.log('Using aws access key id: "' + window.AWS_ACCESS_KEY_ID + '"');
         console.log('Using aws access key secret: "' + window.AWS_ACCESS_KEY_SECRET + '"');
         console.log('Using aws ec2 region: "' + window.AWS_EC2_REGION + '"');
@@ -195,13 +202,23 @@
             timeSeriesChart.destroy();
             statsChart.destroy();
 
+            var searchTerm = $("#search-term").val();
+
             $.ajax({
+                beforeSend: function (xhrObj) {
+                    xhrObj.setRequestHeader("Content-Type", "application/json");
+                    xhrObj.setRequestHeader("Accept", "application/json");
+                },
                 type: "POST",
-                url: window.REGISTRAR_URL + "/terms/stop"
+                url: window.REGISTRAR_URL + "/terms/stop",
+                dataType: "json",
+                data: JSON.stringify({
+                    "identifier": searchTerm
+                })
             }).done(function (data) {
                 console.log("unregistered term");
             }).fail(function (data) {
-                console.error("could not unregister term");
+                console.error("Could not unregister term");
             });
         });
 
