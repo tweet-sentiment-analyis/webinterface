@@ -1,3 +1,12 @@
+/**
+ * Allows to fetch different statistics from AWS.
+ * Note, that the given keypair must have at least the following access permissions at AWS:
+ * - AmazonSQSReadOnlyAccess
+ * - CloudWatchReadOnlyAccess
+ *
+ * @returns {{create: create, getAnalyzerAutoScalingGroupMetrics: getAnalyzerAutoScalingGroupMetrics, getProducerAutoScalingGroupMetrics: getProducerAutoScalingGroupMetrics, getIncomingMessageCount: getIncomingMessageCount, getOutComingMessageCount: getOutComingMessageCount, getAnalyzerCpuLoadMetrics: getAnalyzerCpuLoadMetrics, getProducerCpuLoadMetrics: getProducerCpuLoadMetrics}}
+ * @constructor
+ */
 function AwsCloudMetrics() {
     var config = {
         accessKeyId: null,
@@ -12,20 +21,27 @@ function AwsCloudMetrics() {
         create: create,
         getAnalyzerAutoScalingGroupMetrics: getAnalyzerAutoScalingGroupMetrics,
         getProducerAutoScalingGroupMetrics: getProducerAutoScalingGroupMetrics,
-        getGroupTotalInstances: getGroupTotalInstances,
-        getGroupPendingInstances: getGroupPendingInstances,
         getIncomingMessageCount: getIncomingMessageCount,
         getOutComingMessageCount: getOutComingMessageCount,
         getAnalyzerCpuLoadMetrics: getAnalyzerCpuLoadMetrics,
         getProducerCpuLoadMetrics: getProducerCpuLoadMetrics
     };
 
+    /**
+     * Initialize the connection to AWS.
+     * Note, that the given keypair must have at least the following access permissions at AWS:
+     * - AmazonSQSReadOnlyAccess
+     * - CloudWatchReadOnlyAccess
+     *
+     * @param accessKeyId The access key id to AWS
+     * @param secretAccessKey The access key secret to AWS
+     */
     function create(accessKeyId, secretAccessKey) {
         config.accessKeyId = accessKeyId;
         config.secretAccessKey = secretAccessKey;
 
         AWS.config.update(config);
-        AWS.config.region = 'us-west-2'; // TODO: make configurable
+        AWS.config.region = window.AWS_EC2_REGION;
         AWS.config.apiVersions = {
             cloudwatch: '2010-08-01',
             sqs: '2012-11-05'
@@ -141,7 +157,7 @@ function AwsCloudMetrics() {
     function getAnalyzerAutoScalingGroupMetrics(callbackFn) {
         var params = {
             AutoScalingGroupNames: [
-                "ASE_ASG_Analyzer"
+                window.AWS_ANALYZER_AUTO_SCALING_GROUP_NAME
             ]
         };
 
@@ -157,7 +173,7 @@ function AwsCloudMetrics() {
     function getProducerAutoScalingGroupMetrics(callbackFn) {
         var params = {
             AutoScalingGroupNames: [
-                "ASE_ASG_ESProducer"
+                window.AWS_PRODUCER_AUTO_SCALING_GROUP_NAME
             ]
         };
 
@@ -171,11 +187,11 @@ function AwsCloudMetrics() {
     }
 
     function getIncomingMessageCount(callbackFn) {
-        getMessageCount('fetched-tweets', callbackFn);
+        getMessageCount(window.AWS_FETCHED_TWEETS_SQS_QUEUE_NAME, callbackFn);
     }
 
     function getOutComingMessageCount(callbackFn) {
-        getMessageCount('analyised-tweets', callbackFn);
+        getMessageCount(window.AWS_ANALYZED_TWEETS_SQS_QUEUE_NAME, callbackFn);
     }
 
     function getMessageCount(queueNamePrefix, callbackFn) {
@@ -207,77 +223,6 @@ function AwsCloudMetrics() {
                 } else {
                     console.error("Could not find queue with prefix: " + queueNamePrefix);
                 }
-            }
-        });
-    }
-
-    function getGroupTotalInstances(startTime, endTime, callbackFn) {
-        // http://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/CloudWatch.html#getMetricStatistics-property
-        var params = {
-            StartTime: startTime.format(),
-            EndTime: endTime.format(),
-            Period: 60, // multiple of 60 if smaller than 15 days
-
-            Dimensions: [
-                {
-                    Name: 'AutoScalingGroupName',
-                    Value: 'ASE_ASG_Analyzer'
-                }
-            ],
-            Statistics: [
-                "SampleCount"
-                /*  SampleCount| Average | Sum | Minimum | Maximum, */
-            ],
-            Unit: "None"
-        };
-
-        var params = {
-            Dimensions: [
-                {
-                    Name: 'AutoScalingGroupName',
-                    Value: 'ASE_ASG_Analyzer'
-                }
-            ],
-            Namespace: 'AWS/AutoScaling',
-            MetricName: 'GroupTotalInstances',
-            NextToken: 'STRING_VALUE'
-        };
-
-        cloudWatch.getMetricStatistics(params, function (err, data) {
-            if (err) {
-                console.log(err, err.stack);
-            } else {
-                callbackFn(data.Datapoints);
-            }
-        });
-    }
-
-    function getGroupPendingInstances(startTime, endTime, callbackFn) {
-        // http://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/CloudWatch.html#getMetricStatistics-property
-        var params = {
-            StartTime: startTime.format(),
-            EndTime: endTime.format(),
-            Period: 60, // multiple of 60 if smaller than 15 days
-            Namespace: 'AWS/AutoScaling',
-            MetricName: 'GroupPendingInstances',
-            Dimensions: [
-                {
-                    Name: 'AutoScalingGroupName',
-                    Value: 'ASE_ASG_Analyzer'
-                }
-            ],
-            Statistics: [
-                "SampleCount"
-                /*  SampleCount| Average | Sum | Minimum | Maximum, */
-            ],
-            Unit: "None"
-        };
-
-        cloudWatch.getMetricStatistics(params, function (err, data) {
-            if (err) {
-                console.log(err, err.stack);
-            } else {
-                callbackFn(data.Datapoints);
             }
         });
     }

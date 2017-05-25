@@ -17,6 +17,29 @@
     <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
     <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
     <![endif]-->
+
+    <script type="application/javascript">
+        // configure these values globally...
+        window.REGISTRAR_URL = '<?php echo getenv("REGISTRAR_URL"); ?>';
+        window.AWS_ACCESS_KEY_ID = '<?php echo getenv("AWS_ACCESS_KEY_ID"); ?>';
+        window.AWS_ACCESS_KEY_SECRET = '<?php echo getenv("AWS_ACCESS_KEY_SECRET"); ?>';
+        window.AWS_EC2_REGION = '<?php echo getenv("AWS_EC2_REGION"); ?>';
+        window.AWS_ANALYZER_AUTO_SCALING_GROUP_NAME = '<?php echo getenv("AWS_ANALYZER_AUTO_SCALING_GROUP_NAME"); ?>';
+        window.AWS_PRODUCER_AUTO_SCALING_GROUP_NAME = '<?php echo getenv("AWS_PRODUCER_AUTO_SCALING_GROUP_NAME"); ?>';
+        window.AWS_FETCHED_TWEETS_SQS_QUEUE_NAME = '<?php echo getenv("AWS_FETCHED_TWEETS_SQS_QUEUE_NAME"); ?>';
+        window.AWS_ANALYZED_TWEETS_SQS_QUEUE_NAME = '<?php echo getenv("AWS_ANALYZED_TWEETS_SQS_QUEUE_NAME"); ?>';
+        window.REQUEST_INTERVAL = 2500;
+
+        console.log('Using registrar endpoint: "' + window.REGISTRAR_URL + '"');
+        console.log('Using aws access key id: "' + window.AWS_ACCESS_KEY_ID + '"');
+        console.log('Using aws access key secret: "' + window.AWS_ACCESS_KEY_SECRET + '"');
+        console.log('Using aws ec2 region: "' + window.AWS_EC2_REGION + '"');
+        console.log('Using aws analyzer auto scaling group name: "' + window.AWS_ANALYZER_AUTO_SCALING_GROUP_NAME + '"');
+        console.log('Using aws producer auto scaling group name: "' + window.AWS_PRODUCER_AUTO_SCALING_GROUP_NAME + '"');
+        console.log('Using aws fetched tweets SQS queue name: "' + window.AWS_FETCHED_TWEETS_SQS_QUEUE_NAME + '"');
+        console.log('Using aws analyzed tweets SQS queue name: "' + window.AWS_ANALYZED_TWEETS_SQS_QUEUE_NAME + '"');
+        console.log('Using statistic request interval: "' + window.REQUEST_INTERVAL + '"');
+    </script>
 </head>
 <body>
 
@@ -127,8 +150,6 @@
 
 <script type="application/javascript">
     $(document).ready(function () {
-        const REGISTRAR_URL = '<?php echo getenv("REGISTRAR_URL"); ?>';
-
         var timeSeriesChart = null;
         var statsChart = null;
 
@@ -143,7 +164,7 @@
                     xhrObj.setRequestHeader("Accept", "application/json");
                 },
                 type: "POST",
-                url: REGISTRAR_URL + "/terms",
+                url: window.REGISTRAR_URL + "/terms",
                 dataType: "json",
                 data: JSON.stringify({
                     "identifier": searchTerm
@@ -176,7 +197,7 @@
 
             $.ajax({
                 type: "POST",
-                url: REGISTRAR_URL + "/terms/stop"
+                url: window.REGISTRAR_URL + "/terms/stop"
             }).done(function (data) {
                 console.log("unregistered term");
             }).fail(function (data) {
@@ -185,11 +206,10 @@
         });
 
         var architecturalChart = new ArchitecturalChart("#architectural-overview", "#workernodes-performance");
-        architecturalChart.config.accessKeyId = "AKIAJK7MH5K6NML2YCJQ";
-        architecturalChart.config.accessKeySecret = "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";
-        architecturalChart.config.intervalTimeout = 5000;
+        architecturalChart.config.accessKeyId = window.AWS_ACCESS_KEY_ID;
+        architecturalChart.config.accessKeySecret = window.AWS_ACCESS_KEY_SECRET;
+        architecturalChart.config.intervalTimeout = window.REQUEST_INTERVAL;
         architecturalChart.create();
-
     });
 </script>
 
