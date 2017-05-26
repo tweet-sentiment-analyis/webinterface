@@ -2,6 +2,8 @@
 
 This component let's the user register terms for analyzing. 
 
+![Webinterface Screenshot](https://github.com/tweet-sentiment-analyis/webinterface/blob/master/img/webinterface.png)
+
 ## Build and Deploy
 * Login to your account to dockerhub: `docker login`
 * From the root of this project, build a new docker image with the respective version: `docker build -t tweetsentimentanalysis/webinterface:0.0.2 -t tweetsentimentanalysis/webinterface:latest .`
