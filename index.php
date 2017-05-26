@@ -65,7 +65,7 @@
         </div>
     </div>
     <div class="row">
-        <div class="col-md-8">
+        <div class="col-md-6">
             <div class="panel panel-default">
                 <div class="panel-heading">
                     <h3 class="panel-title">Current Architectural Overview</h3>
@@ -75,22 +75,43 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-4">
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <h3 class="panel-title">Worker Nodes Performance</h3>
+        <div class="col-md-6">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h3 class="panel-title">Analyzer Worker Nodes Performance</h3>
+                        </div>
+                        <div class="panel-body">
+                            <table class="table table-striped table-condensed">
+                                <thead>
+                                <tr>
+                                    <th>Id</th>
+                                    <th>CPU <small>(avg/max/min)</small></th>
+                                </tr>
+                                </thead>
+                                <tbody id="analyzer-workernodes-performance"></tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
-                <div class="panel-body">
-                    <table class="table table-striped table-condensed">
-                        <thead>
-                        <tr>
-                            <th>Id</th>
-                            <th>Type</th>
-                            <th>CPU Usage</th>
-                        </tr>
-                        </thead>
-                        <tbody id="workernodes-performance"></tbody>
-                    </table>
+                <div class="col-md-6">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h3 class="panel-title">Producer Worker Nodes Performance</h3>
+                        </div>
+                        <div class="panel-body">
+                            <table class="table table-striped table-condensed">
+                                <thead>
+                                <tr>
+                                    <th>Id</th>
+                                    <th>CPU <small>(avg/max/min)</small></th>
+                                </tr>
+                                </thead>
+                                <tbody id="producer-workernodes-performance"></tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -222,7 +243,7 @@
             });
         });
 
-        var architecturalChart = new ArchitecturalChart("#architectural-overview", "#workernodes-performance");
+        var architecturalChart = new ArchitecturalChart("#architectural-overview", "#analyzer-workernodes-performance", "#producer-workernodes-performance");
         architecturalChart.config.accessKeyId = window.AWS_ACCESS_KEY_ID;
         architecturalChart.config.accessKeySecret = window.AWS_ACCESS_KEY_SECRET;
         architecturalChart.config.intervalTimeout = window.REQUEST_INTERVAL;

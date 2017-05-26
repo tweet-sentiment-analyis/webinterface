@@ -3,12 +3,13 @@
  * and on the other hand side a list of metrics of compute nodes.
  *
  * @param architectureDiagramSelector The element selector as string in which the overview should be rendered
- * @param metricDiagramSelector The element selector as string in which the metrics should be rendered
+ * @param analyzerMetricDiagramSelector The element selector as string in which the analyzer metrics should be rendered
+ * @param producerMetricDiagramSelector The element selector as string in which the producer metrics should be rendered
  *
  * @returns {{config: {accessKeyId: null, accessKeySecret: null, intervalTimeout: number}, create: create, destroy: destroy}}
  * @constructor
  */
-function ArchitecturalChart(architectureDiagramSelector, metricDiagramSelector) {
+function ArchitecturalChart(architectureDiagramSelector, analyzerMetricDiagramSelector, producerMetricDiagramSelector) {
     var config = {
         accessKeyId: null,
         accessKeySecret: null,
@@ -86,7 +87,7 @@ function ArchitecturalChart(architectureDiagramSelector, metricDiagramSelector) 
             aws.getAnalyzerCpuLoadMetrics(function (requests) {
                 // clear previously added metrics
                 var avlblInstances = {};
-                $(metricDiagramSelector).children().each(function () {
+                $(analyzerMetricDiagramSelector).children().each(function () {
                     var id = $(this).attr('id');
                     avlblInstances[id] = id;
                 });
@@ -103,12 +104,22 @@ function ArchitecturalChart(architectureDiagramSelector, metricDiagramSelector) 
                         if (response.data.Datapoints.length > 0) {
 
                             var instanceId = response.request.params.Dimensions[0].Value;
-                            var avg = Number((response.data.Datapoints[0].Average).toFixed(2)) + " (avg)";
-                            var min = Number((response.data.Datapoints[0].Minimum).toFixed(2)) + " (min)";
-                            var max = Number((response.data.Datapoints[0].Maximum).toFixed(2)) + " (max)";
-                            $('#' + instanceId).remove();
-                            $(metricDiagramSelector)
-                                .append('<tr id="' + instanceId + '"><td>' + instanceId + '</td><td>Analyzer</td><td>' + avg + '<br>' + max + '<br>' + min + '</td>');
+                            var avg = Number((response.data.Datapoints[0].Average).toFixed(2));
+                            var max = Number((response.data.Datapoints[0].Maximum).toFixed(2));
+                            var min = Number((response.data.Datapoints[0].Minimum).toFixed(2));
+
+                            var instanceSelector = 'instance-' + instanceId;
+                            var instanceInformation = '<small><strong>' + avg + '</strong> / ' + max + ' / ' + min + '</small>';
+
+                            if ($('#' + instanceSelector).length > 0) {
+                                // we can update the value
+                                $('#' + instanceSelector).empty();
+                                $('#' + instanceSelector).append(instanceInformation);
+                            } else {
+                                // we have to append a new row
+                                $(analyzerMetricDiagramSelector)
+                                    .append('<tr id="' + instanceId + '"><td><small>' + instanceId.substring(0, Math.min(6, instanceId.length)) + '...</small></td><td id="' + instanceSelector + '">' + instanceInformation + '</td>');
+                            }
                         }
                     });
 
@@ -125,7 +136,7 @@ function ArchitecturalChart(architectureDiagramSelector, metricDiagramSelector) 
             aws.getProducerCpuLoadMetrics(function (requests) {
                 // clear previously added metrics
                 var avlblInstances = {};
-                $(metricDiagramSelector).children().each(function () {
+                $(producerMetricDiagramSelector).children().each(function () {
                     var id = $(this).attr('id');
                     avlblInstances[id] = id;
                 });
@@ -142,12 +153,22 @@ function ArchitecturalChart(architectureDiagramSelector, metricDiagramSelector) 
                         if (response.data.Datapoints.length > 0) {
 
                             var instanceId = response.request.params.Dimensions[0].Value;
-                            var avg = Number((response.data.Datapoints[0].Average).toFixed(2)) + " (avg)";
-                            var min = Number((response.data.Datapoints[0].Minimum).toFixed(2)) + " (min)";
-                            var max = Number((response.data.Datapoints[0].Maximum).toFixed(2)) + " (max)";
-                            $('#' + instanceId).remove();
-                            $(metricDiagramSelector)
-                                .append('<tr id="' + instanceId + '"><td>' + instanceId + '</td><td>ES Producer</td><td>' + avg + '<br>' + max + '<br>' + min + '</td>');
+                            var avg = Number((response.data.Datapoints[0].Average).toFixed(2));
+                            var max = Number((response.data.Datapoints[0].Maximum).toFixed(2));
+                            var min = Number((response.data.Datapoints[0].Minimum).toFixed(2));
+
+                            var instanceSelector = 'instance-' + instanceId;
+                            var instanceInformation = '<small><strong>' + avg + '</strong> / ' + max + ' / ' + min + '</small>';
+
+                            if ($('#' + instanceSelector).length > 0) {
+                                // we can update the value
+                                $('#' + instanceSelector).empty();
+                                $('#' + instanceSelector).append(instanceInformation);
+                            } else {
+                                // we have to append a new row
+                                $(producerMetricDiagramSelector)
+                                    .append('<tr id="' + instanceId + '"><td><small>' + instanceId.substring(0, Math.min(6, instanceId.length)) + '...</small></td><td id="' + instanceSelector + '">' + instanceInformation + '</td>');
+                            }
                         }
                     });
 
